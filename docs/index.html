@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f9f4ed">
+  <title>Marcella &amp; Ryan · Find Your Seat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;500&family=Cormorant+Garamond:wght@300;400&family=Figtree:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #f9f4ed;
+      --cream-2: #faf7f1;
+      --ink: #2a231d;
+      --muted: #6f655c;
+      --lime: #c0ca33;
+      --lime-dark: #a9b22a;
+      --line: #e9e1d4;
+      --serif: "Cormorant Garamond", Georgia, serif;
+      --display: "Fraunces", "Playfair Display", Georgia, serif;
+      --label: "Abhaya Libre", Georgia, serif;
+      --sans: "Figtree", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+    /* ---------- Hero ---------- */
+    .hero { background: #fff; display: grid; grid-template-columns: 1fr; }
+    .hero-text { padding: 72px 24px 40px; text-align: center; }
+    .eyebrow { font-family: var(--label); font-size: 13.6px; letter-spacing: .4em; text-transform: uppercase; margin: 0; }
+    .names { font-family: var(--serif); font-weight: 300; font-size: 30px; letter-spacing: .16em; text-transform: uppercase; margin: 18px 0; }
+    .date { font-family: var(--label); font-size: 15.2px; letter-spacing: .35em; margin: 0; }
+    .rule { width: 36px; height: 1px; background: var(--lime); margin: 26px auto; border: 0; }
+    .cta { display: grid; gap: 12px; max-width: 360px; margin: 30px auto 0; }
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      background: var(--lime); color: #fff; text-decoration: none; border: 0; border-radius: 4px;
+      font-family: var(--label); font-size: 13.6px; letter-spacing: .2em; text-transform: uppercase;
+      padding: 16px 20px; cursor: pointer; width: 100%; transition: background .2s;
+    }
+    .btn:hover { background: var(--lime-dark); }
+    .btn .arrow { font-family: var(--sans); font-size: 16px; letter-spacing: 0; }
+    .hero-photo { height: 58vh; min-height: 320px; background: url("cover.jpg") center 30% / cover no-repeat; }
+
+    @media (min-width: 860px) {
+      .hero { grid-template-columns: 45% 55%; min-height: 600px; }
+      .hero-photo {
+        order: -1; height: auto;
+        -webkit-mask-image: linear-gradient(to right, #000 70%, transparent);
+        mask-image: linear-gradient(to right, #000 70%, transparent);
+      }
+      .hero-text { align-self: center; padding: 60px 48px; }
+      .names { font-size: 42px; text-transform: none; letter-spacing: .08em; }
+      .cta { max-width: 490px; }
+    }
+
+    /* ---------- Find your seat ---------- */
+    .seat { padding: 64px 18px calc(72px + env(safe-area-inset-bottom)); text-align: center; scroll-margin-top: 0; }
+    .seat h2 { font-family: var(--display); font-weight: 300; font-size: clamp(36px, 9vw, 52px); letter-spacing: -.01em; margin: 0; color: var(--ink); }
+    .seat .sub { font-family: var(--label); font-size: 17px; color: var(--muted); margin: 12px 0 32px; }
+    .card {
+      max-width: 640px; margin: 0 auto; background: #fff; border-radius: 28px;
+      padding: 36px 28px; box-shadow: 0 18px 50px rgba(42, 35, 29, .07);
+    }
+    .fields { display: grid; gap: 14px; text-align: left; }
+    @media (min-width: 560px) { .fields { grid-template-columns: 1fr 1fr; } }
+    label { display: block; font-family: var(--label); font-size: 12.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin: 0 0 7px; }
+    input {
+      width: 100%; font: 400 17px var(--sans); /* >=16px prevents iOS zoom */
+      color: var(--ink); background: var(--cream-2); border: 1px solid var(--line); border-radius: 12px;
+      padding: 14px 15px; outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    input::placeholder { color: #b3a99e; }
+    input:focus { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(192, 202, 51, .2); background: #fff; }
+    .card .btn { margin-top: 22px; }
+    .link { background: none; border: 0; color: var(--muted); font: 500 14px var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 10px; margin-top: 10px; }
+
+    .result { display: none; }
+    .result.show { display: block; animation: fade .4s ease; }
+    .welcome { font-family: var(--display); font-weight: 300; font-size: 28px; margin: 0; }
+    .label-sm { font-family: var(--label); font-size: 12.5px; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); margin: 22px 0 0; }
+    .table-num { font-family: var(--serif); font-weight: 300; font-size: 104px; line-height: 1; margin: 6px 0 0; }
+    .table-num.word { font-size: 46px; line-height: 1.15; margin-top: 12px; }
+    .result .rule { margin: 20px auto; }
+    .mates { font-family: var(--label); font-size: 16px; color: var(--muted); margin: 0 auto 6px; max-width: 420px; line-height: 1.5; }
+    .msg { font-family: var(--label); font-size: 17px; color: var(--muted); margin: 12px 0 20px; line-height: 1.45; }
+    .choices { display: grid; gap: 10px; max-width: 360px; margin: 0 auto; }
+    .choice { font: 500 16px var(--sans); color: var(--ink); background: var(--cream-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer; }
+    .choice:hover { border-color: var(--lime); }
+    .multi { margin: 8px 0 4px; }
+    .multi div { font-family: var(--serif); font-size: 24px; padding: 4px 0; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-text">
+      <hr class="rule" style="margin-top:0">
+      <p class="eyebrow">Welcome to our wedding</p>
+      <h1 class="names">Marcella &amp; Ryan</h1>
+      <hr class="rule">
+      <p class="date">October 2026</p>
+      <div class="cta">
+        <a class="btn" href="https://www.wedibox.com/w/reccOVwvDBvAitFh">Upload Media <span class="arrow">→</span></a>
+        <a class="btn" href="#find-your-seat">Find Your Seat <span class="arrow">→</span></a>
+      </div>
+    </div>
+    <div class="hero-photo" role="img" aria-label="Marcella &amp; Ryan"></div>
+  </header>
+
+  <section class="seat" id="find-your-seat">
+    <h2>Find Your Seat</h2>
+    <p class="sub">Enter your name to find your table assignment</p>
+
+    <div class="card">
+      <form id="form" autocomplete="off" novalidate>
+        <div class="fields">
+          <div>
+            <label for="first">First name</label>
+            <input id="first" name="first" placeholder="First name" autocapitalize="words" autocomplete="given-name" required>
+          </div>
+          <div>
+            <label for="last">Last name</label>
+            <input id="last" name="last" placeholder="Last name" autocapitalize="words" autocomplete="family-name" required>
+          </div>
+        </div>
+        <button class="btn" type="submit">Find My Table <span class="arrow">→</span></button>
+      </form>
+
+      <div id="result" class="result" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <script>
+    // Common nicknames so "Bob" finds "Robert", etc. Both directions are checked.
+    const NICKNAMES = {
+      robert: ["bob", "rob", "bobby", "robbie"], william: ["bill", "will", "billy", "liam"],
+      richard: ["rick", "dick", "rich", "ricky"], james: ["jim", "jimmy", "jamie"],
+      john: ["jack", "johnny"], joseph: ["joe", "joey"], michael: ["mike", "mikey"],
+      thomas: ["tom", "tommy"], charles: ["charlie", "chuck"], edward: ["ed", "eddie", "ted", "ned"],
+      elizabeth: ["liz", "beth", "betty", "lizzie", "eliza", "libby"], margaret: ["maggie", "meg", "peggy"],
+      katherine: ["kate", "katie", "kathy", "kat"], catherine: ["cathy", "cate", "kate", "katie"],
+      jennifer: ["jen", "jenny"], patricia: ["pat", "patty", "trish"], susan: ["sue", "susie"],
+      deborah: ["deb", "debbie"], rebecca: ["becky", "becca"], alexander: ["alex", "xander"],
+      alexandra: ["alex", "lexi"], daniel: ["dan", "danny"], anthony: ["tony"], nicholas: ["nick"],
+      christopher: ["chris"], christina: ["chris", "tina"], matthew: ["matt"], benjamin: ["ben"],
+      samuel: ["sam"], samantha: ["sam"], andrew: ["andy", "drew"], steven: ["steve"], stephen: ["steve"],
+      gregory: ["greg"], jonathan: ["jon"], timothy: ["tim"], victoria: ["vicky", "tori"]
+    };
+
+    const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+
+    function editDistance(a, b) {
+      if (Math.abs(a.length - b.length) > 2) return 3;
+      const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+      for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+      for (let i = 1; i <= a.length; i++)
+        for (let j = 1; j <= b.length; j++) {
+          dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+          // Swapped letters ("Smtih") count as one typo.
+          if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + 1);
+        }
+      return dp[a.length][b.length];
+    }
+
+    const typoOk = (a, b) => editDistance(a, b) <= (Math.max(a.length, b.length) > 6 ? 2 : 1);
+    const isNick = (a, b) => (NICKNAMES[a] || []).includes(b) || (NICKNAMES[b] || []).includes(a);
+    const firstClose = (typed, actual) =>
+      typoOk(typed, actual) || isNick(typed, actual) ||
+      (Math.min(typed.length, actual.length) >= 3 && (actual.startsWith(typed) || typed.startsWith(actual)));
+
+    let guests = [];
+    const guestsReady = fetch("guests.json", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => { guests = data.map((g) => ({ ...g, f: norm(g.first), l: norm(g.last) })); });
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    const isNumber = (t) => /^\d+$/.test(String(t).trim());
+    const listNames = (names) => names.length <= 2 ? names.join(" & ") : names.slice(0, -1).join(", ") + " & " + names.at(-1);
+
+    function showFound(matches) {
+      const tables = [...new Set(matches.map((m) => m.table))];
+      let html = `<p class="welcome">Welcome, ${esc(matches[0].first)}!</p>`;
+      if (tables.length === 1) {
+        const t = tables[0];
+        html += isNumber(t)
+          ? `<p class="label-sm">Your table</p><p class="table-num">${esc(t)}</p>`
+          : `<p class="label-sm">You'll be seated at the</p><p class="table-num word">${esc(t)} Table</p>`;
+        const me = matches[0];
+        const mates = guests.filter((g) => g.table === t && !(g.f === me.f && g.l === me.l)).map((g) => esc(g.first));
+        if (mates.length) html += `<hr class="rule"><p class="mates">Sharing your table: ${listNames(mates)}</p>`;
+      } else {
+        // Two guests with the same name: show both so they can pick.
+        html += `<p class="msg">We have more than one guest with this name:</p><div class="multi">` +
+          matches.map((m) => `<div>${esc(m.first)} ${esc(m.last)} — Table ${esc(m.table)}</div>`).join("") + `</div>`;
+      }
+      html += `<button class="link" type="button" data-action="reset">Look up another guest</button>`;
+      render(html);
+    }
+
+    function showChoices(list) {
+      window.__choices = list;
+      render(
+        `<p class="welcome">Did you mean…</p><p class="msg">Tap your name below.</p><div class="choices">` +
+        list.map((g, i) => `<button class="choice" type="button" data-pick="${i}">${esc(g.first)} ${esc(g.last)}</button>`).join("") +
+        `</div><button class="link" type="button" data-action="reset">None of these — try again</button>`
+      );
+    }
+
+    function showNotFound(first, last) {
+      render(
+        `<p class="welcome">We couldn't find you</p>` +
+        `<p class="msg">We didn't find “${esc(first)} ${esc(last)}”. Please check the spelling, or ask a member of the wedding party and we'll get you seated.</p>` +
+        `<button class="btn" type="button" data-action="reset">Try Again</button>`
+      );
+    }
+
+    function render(html) {
+      $("form").style.display = "none";
+      $("result").innerHTML = html;
+      $("result").classList.add("show");
+      $("find-your-seat").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function reset() {
+      $("result").classList.remove("show");
+      $("result").innerHTML = "";
+      $("form").style.display = "";
+      $("form").reset();
+      $("first").focus();
+    }
+
+    $("result").addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      if (btn.dataset.action === "reset") reset();
+      if (btn.dataset.pick !== undefined) {
+        const g = window.__choices[+btn.dataset.pick];
+        showFound(guests.filter((x) => x.f === g.f && x.l === g.l));
+      }
+    });
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const firstRaw = $("first").value.trim(), lastRaw = $("last").value.trim();
+      const f = norm(firstRaw), l = norm(lastRaw);
+      if (!f || !l) { (f ? $("last") : $("first")).focus(); return; }
+      await guestsReady;
+
+      const exact = guests.filter((g) => g.f === f && g.l === l);
+      if (exact.length) return showFound(exact);
+
+      const close = guests.filter((g) => typoOk(l, g.l) && firstClose(f, g.f));
+      if (close.length) {
+        // De-duplicate identical names; showFound handles same-name guests.
+        const unique = [...new Map(close.map((g) => [g.f + "|" + g.l, g])).values()];
+        return unique.length === 1 ? showFound(guests.filter((x) => x.f === unique[0].f && x.l === unique[0].l)) : showChoices(unique.slice(0, 6));
+      }
+      showNotFound(firstRaw, lastRaw);
+    });
+  </script>
+</body>
+</html>
