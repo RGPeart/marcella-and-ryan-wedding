@@ -143,7 +143,9 @@
       thomas: ["tom", "tommy"], charles: ["charlie", "chuck"], edward: ["ed", "eddie", "ted", "ned"],
       elizabeth: ["liz", "beth", "betty", "lizzie", "eliza", "libby"], margaret: ["maggie", "meg", "peggy"],
       katherine: ["kate", "katie", "kathy", "kat"], catherine: ["cathy", "cate", "kate", "katie"],
-      jennifer: ["jen", "jenny"], patricia: ["pat", "patty", "trish"], susan: ["sue", "susie"],
+      jennifer: ["jen", "jenny"], patricia: ["pat", "patty", "trish"], susan: ["sue", "susie", "suzy"],
+      suzanne: ["suzy", "suzie", "sue", "susie"], fernando: ["nando"], beatriz: ["bia", "bea"],
+      david: ["dave", "davey"], lucas: ["luke"], amanda: ["mandy"], randall: ["randy"],
       deborah: ["deb", "debbie"], rebecca: ["becky", "becca"], alexander: ["alex", "xander"],
       alexandra: ["alex", "lexi"], daniel: ["dan", "danny"], anthony: ["tony"], nicholas: ["nick"],
       christopher: ["chris"], christina: ["chris", "tina"], matthew: ["matt"], benjamin: ["ben"],
@@ -168,9 +170,44 @@
 
     const typoOk = (a, b) => editDistance(a, b) <= (Math.max(a.length, b.length) > 6 ? 2 : 1);
     const isNick = (a, b) => (NICKNAMES[a] || []).includes(b) || (NICKNAMES[b] || []).includes(a);
-    const firstClose = (typed, actual) =>
-      typoOk(typed, actual) || isNick(typed, actual) ||
-      (Math.min(typed.length, actual.length) >= 3 && (actual.startsWith(typed) || typed.startsWith(actual)));
+    const isPrefix = (a, b) => Math.min(a.length, b.length) >= 3 && (a.startsWith(b) || b.startsWith(a));
+    const sameStart = (a, b) => a.length >= 3 && b.length >= 3 && a.slice(0, 3) === b.slice(0, 3);
+
+    // How similar a typed name is to a guest's name: 3 = exact … 0 = unrelated.
+    function firstScore(typed, actual) {
+      if (typed === actual) return 3;
+      if (isNick(typed, actual)) return 2.5;          // Suzy → Suzanne
+      if (typoOk(typed, actual) || isPrefix(typed, actual)) return 2; // Stefanno, Kat → Katherine
+      if (sameStart(typed, actual)) return 1;
+      return 0;
+    }
+    function lastScore(typed, actual) {
+      if (typed === actual) return 3;
+      if (typoOk(typed, actual)) return 2;
+      if (isPrefix(typed, actual)) return 1.5;         // Smith → Smith-Jones
+      if (sameStart(typed, actual)) return 1;
+      return 0;
+    }
+
+    // Ranked "did you mean" list for anything that isn't an exact match. Catches
+    // typos, nicknames (Suzy Hodges → Suzanne Hodges), changed surnames
+    // (Chelsea Peart → Chelsea Colyer), family members, and swapped first/last.
+    function suggestions(f, l, limit = 6) {
+      const scored = guests.map((g) => {
+        const fs = firstScore(f, g.f), ls = lastScore(l, g.l);
+        const swapped = Math.min(firstScore(l, g.f), lastScore(f, g.l)) >= 2 ? firstScore(l, g.f) + lastScore(f, g.l) - 0.5 : 0;
+        let score = 0;
+        if (fs >= 2 && ls >= 1) score = fs + ls;            // close on both names
+        else if (fs >= 2.5) score = fs + ls;                 // same first name, different surname
+        else if (ls >= 2) score = fs + ls - 0.1;             // same family / unknown nickname
+        else if (fs >= 2) score = fs + ls - 0.5;             // first-name typo, different surname
+        return { g, score: Math.max(score, swapped), fs };
+      }).filter((s) => s.score > 0);
+      scored.sort((a, b) => b.score - a.score || b.fs - a.fs);
+      // One entry per distinct name; showFound handles guests who share a name.
+      const unique = [...new Map(scored.map((s) => [s.g.f + "|" + s.g.l, s.g])).values()];
+      return unique.slice(0, limit);
+    }
 
     let guests = [];
     const guestsReady = fetch("guests.json", { cache: "no-store" })
@@ -202,12 +239,14 @@
       render(html);
     }
 
-    function showChoices(list) {
+    function showChoices(list, first, last) {
       window.__choices = list;
       render(
-        `<p class="welcome">Did you mean…</p><p class="msg">Tap your name below.</p><div class="choices">` +
+        `<p class="welcome">Did you mean…</p>` +
+        `<p class="msg">We couldn't find an exact match for “${esc(first)} ${esc(last)}”.<br>Tap your name below.</p><div class="choices">` +
         list.map((g, i) => `<button class="choice" type="button" data-pick="${i}">${esc(g.first)} ${esc(g.last)}</button>`).join("") +
-        `</div><button class="link" type="button" data-action="reset">None of these — try again</button>`
+        `</div><button class="link" type="button" data-action="reset">None of these — try again</button>` +
+        `<p class="msg" style="font-size:15px;margin-bottom:0">Still can't find yourself? Ask a member of the wedding party and we'll get you seated.</p>`
       );
     }
 
@@ -254,13 +293,8 @@
       const exact = guests.filter((g) => g.f === f && g.l === l);
       if (exact.length) return showFound(exact);
 
-      const close = guests.filter((g) => typoOk(l, g.l) && firstClose(f, g.f));
-      if (close.length) {
-        // De-duplicate identical names; showFound handles same-name guests.
-        const unique = [...new Map(close.map((g) => [g.f + "|" + g.l, g])).values()];
-        return unique.length === 1 ? showFound(guests.filter((x) => x.f === unique[0].f && x.l === unique[0].l)) : showChoices(unique.slice(0, 6));
-      }
-      showNotFound(firstRaw, lastRaw);
+      const similar = suggestions(f, l);
+      similar.length ? showChoices(similar, firstRaw, lastRaw) : showNotFound(firstRaw, lastRaw);
     });
   </script>
 </body>
